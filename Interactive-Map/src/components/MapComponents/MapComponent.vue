@@ -30,7 +30,7 @@ function mapSetup(): L.Map{
 async function fetchAllEvents() {
   // TODO 
   try {
-    const response = await fetch("http://localhost:3000/");
+    const response = await fetch("http://localhost:3000/events");
     if (!response.ok) 
       throw new Error("Failed to fetch data");
     console.log("ja");
@@ -47,6 +47,17 @@ onMounted(() => {
   addMarker(map);
 
   fetchAllEvents();
+
+  map.on('click', function(e) {
+    var lat = e.latlng.lat;
+    var lng = e.latlng.lng;
+
+    // Create a new marker at the clicked location
+    var marker = L.marker([lat, lng]).addTo(map);
+
+    // Optionally, you can bind a popup to the marker
+    marker.bindPopup('You clicked here!').openPopup();
+});
 
 });
 </script>
