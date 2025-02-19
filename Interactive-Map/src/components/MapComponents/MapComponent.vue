@@ -27,8 +27,18 @@ function mapSetup(): L.Map{
   return map;
 }
 
-function fetchAllEvents() {
+async function fetchAllEvents() {
   // TODO 
+  try {
+    const response = await fetch("http://localhost:3000/");
+    if (!response.ok) 
+      throw new Error("Failed to fetch data");
+    console.log("ja");
+    let test = await response.json()
+    console.log(test);
+  } catch (e){
+
+  }
 }
 
 onMounted(() => {
@@ -36,7 +46,7 @@ onMounted(() => {
 
   addMarker(map);
 
- 
+  fetchAllEvents();
 
 });
 </script>
