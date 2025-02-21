@@ -1,65 +1,80 @@
 <template>
-    <div id="map"></div>
+  <div id="map"></div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { reactive } from 'vue'
 import L from 'leaflet'
+import { DataHandler } from '../../Services/DataHandler'
 
-function addMarker(map) {
-   var marker = L.marker([51.505, -0.09]) 
-    .addTo(map)
-    .bindPopup("<div class='test'><img src='../../../public/snake.jpg'></img><b>Hello!</b></div>")
-    .openPopup();
+import type { Event } from '../../types'
 
-     marker.bindTooltip("my tooltip text").openTooltip();
+const events = ref<Event[]>([])
+
+// Dependencies
+const dataHandler = new DataHandler();
+
+function resizePicture(file_path: string): boolean {
+  return false
 }
 
-function mapSetup(): L.Map{
+function addMarker(map: L.Map): void {
+  // TODO format pictures!
+
+  events.value.forEach((event) => {
+    var marker = L.marker([event.locationX, event.locationY])
+      .addTo(map)
+      .bindPopup(
+        `<div class='event-popup'>
+                    <img src=${event.file_path_main}></img>
+                    <b>${event.description_short}</b>
+                  </div>`,
+      )
+      .openPopup()
+
+    marker.bindTooltip('my tooltip text').openTooltip()
+  })
+}
+
+async function mapSetup(): Promise<L.Map> {
   // Initialize the map in the container with a specific view
-  const map = L.map("map").setView([51.505, -0.09], 13);
-  
+  const map = L.map('map').setView([51.505, -0.09], 13)
+
   // Add OpenStreetMap tiles to the map
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors',
-  }).addTo(map);
+  }).addTo(map)
 
-  return map;
+  await fetchAllEvents()
+
+  console.log(events.value)
+
+  return map
 }
 
-async function fetchAllEvents() {
-  // TODO 
-  try {
-    const response = await fetch("http://localhost:3000/events");
-    if (!response.ok) 
-      throw new Error("Failed to fetch data");
-    console.log("ja");
-    let test = await response.json()
-    console.log(test);
-  } catch (e){
-
-  }
+async function fetchAllEvents(): Promise<void> {
+  events.value = await dataHandler.fetchAllEvents()
 }
 
-onMounted(() => {
-  var map = mapSetup();
+onMounted(async () => {
+  var map = await mapSetup()
 
-  addMarker(map);
+  addMarker(map)
 
-  fetchAllEvents();
+  fetchAllEvents()
 
-  map.on('click', function(e) {
-    var lat = e.latlng.lat;
-    var lng = e.latlng.lng;
+  map.on('click', function (e) {
+    var lat = e.latlng.lat
+    var lng = e.latlng.lng
 
     // Create a new marker at the clicked location
-    var marker = L.marker([lat, lng]).addTo(map);
+    var marker = L.marker([lat, lng]).addTo(map)
 
     // Optionally, you can bind a popup to the marker
-    marker.bindPopup('You clicked here!').openPopup();
-});
-
-});
+    marker.bindPopup('You clicked here!').openPopup()
+  })
+})
 </script>
 
 <style>
@@ -68,10 +83,10 @@ onMounted(() => {
   height: 800px;
 }
 
-.test {
+.event-popup {
   color: blue;
-  display: flex; 
-  flex-direction: column; 
+  display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 10px;
 }
