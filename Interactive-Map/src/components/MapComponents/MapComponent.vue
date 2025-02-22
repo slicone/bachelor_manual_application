@@ -1,7 +1,8 @@
 <template>
   <div class="map-sidebar">
     <div id="map"></div>
-    <Modal :currentEvent="currentEventRef" />
+    <ModalDetail v-if="currentEventRef !== null" :currentEvent="currentEventRef" />
+    <ModalCreate></ModalCreate>
   </div>
 </template>
 
@@ -9,7 +10,9 @@
 import { ref, onMounted, reactive, defineComponent } from 'vue'
 import L from 'leaflet'
 import { DataService } from '../../Services/DataService'
-import Modal from './Modal.vue'
+import ModalDetail from './ModalDetail.vue'
+import ModalCreate from './ModalCreate.vue'
+import { Modal } from 'bootstrap';
 
 import type { Event } from '../../types'
 
@@ -17,31 +20,32 @@ const eventsRef = ref<Event[]>([])
 
 const currentEventRef = ref<Event | null>(null)
 
+let map: L.Map
+
 // Dependencies
 const dataHandler = new DataService()
 
-function resizePicture(file_path: string): boolean {
-  return false
+function addMarkerOnStartUp(): void {
+  eventsRef.value.forEach((event) => {
+    addMarkerToMap(event);
+  })
 }
 
-function addMarker(map: L.Map): void {
-  eventsRef.value.forEach((event) => {
-    var marker = L.marker([event.locationX, event.locationY])
+function addMarkerToMap(event: Event): void{
+  var marker = L.marker([event.locationX, event.locationY])
       .addTo(map)
       .bindPopup(
         `<div class='event-popup'>
-                    <img src=http://localhost:3000/images/${event.image_name}></img>
-                    <b>${event.description_short}</b>
-                    <button id="event-button" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                      Erfahre mehr über das Event
-                    </button>
-                  </div>`,
+          <b>${event.description_short}</b>
+          <img src=http://localhost:3000/images/${event.image_name}></img>
+          <button id="event-button" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#detailModal">
+            Erfahre mehr über das Event
+          </button>
+        </div>`,
       )
-
     marker.on('popupopen', () => {
       setCurrentEvent(event)
     })
-  })
 }
 
 function setCurrentEvent(event: Event): void {
@@ -50,7 +54,7 @@ function setCurrentEvent(event: Event): void {
 
 async function mapSetup(): Promise<L.Map> {
   // Initialize the map in the container with a specific view
-  const map = L.map('map').setView([51.505, -0.09], 13)
+  map = L.map('map').setView([51.505, -0.09], 13)
 
   // Add OpenStreetMap tiles to the map
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -66,44 +70,75 @@ async function fetchAllEvents(): Promise<void> {
   eventsRef.value = await dataHandler.fetchAllEvents()
 }
 
-onMounted(async () => {
-  var map = await mapSetup()
-
-  addMarker(map)
-
-  fetchAllEvents()
-
-  /*
-  map.on('click', function (e) {
+function addEvent(): void {
+  map.on('dblclick', function (e) {
     var lat = e.latlng.lat
     var lng = e.latlng.lng
+    var myModal = new Modal(document.getElementById('createModal'), {
+      keyboard: true,
+    })
 
-    // Create a new marker at the clicked location
-    var marker = L.marker([lat, lng]).addTo(map)
-
-    // Optionally, you can bind a popup to the marker
-    marker.bindPopup('You clicked here!').openPopup()
+    myModal.show()
+   
+    // TODO add marker if saved and added to database (successfull api call)
   })
-  */
+}
+
+onMounted(async () => {
+  await mapSetup();
+  addMarkerOnStartUp();
+  fetchAllEvents();
+  addEvent();
 })
 </script>
 
 <style>
 #map {
-  width: 1200px;
-  height: 800px;
+  position: absolute;
+  top: 5%;
+  bottom: 0px;
+  left: 0px;
+  width: 100%;
+  height: 95%;
+  z-index: 10;
 }
 
+
+.btn-add-marker {
+  position: absolute;
+  top: 80%;
+  left: 10%;
+  z-index: 20;
+}
+
+
 .event-popup {
-  color: blue;
+  color: white;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
+  background-color: b;
+}
+
+.event-popup img {
+  width: 100%;
+  height: auto;
+  max-height: 200px;
+  object-fit: cover;
+  border: 5px solid #383e45;
+  border-radius: 5%;
 }
 
 .map-sidebar {
+  gap: 10px;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  align-items: center;
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background-color: #2b3035;
 }
 </style>
