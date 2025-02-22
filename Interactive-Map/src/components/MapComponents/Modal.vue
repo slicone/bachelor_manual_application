@@ -23,6 +23,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+            {{currentEvent}}
             <button
               type="button"
               class="btn-close"
@@ -42,6 +43,10 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from 'vue'
+import { defineProps, Ref } from 'vue'
 import type { Event } from '../../types'
+
+defineProps<{
+  currentEvent: Event | null
+}>()
 </script>

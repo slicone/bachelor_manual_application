@@ -1,7 +1,7 @@
 <template>
   <div class="map-sidebar">
     <div id="map"></div>
-    <Modal />
+    <Modal :currentEvent="currentEventRef" />
   </div>
 </template>
 
@@ -13,14 +13,9 @@ import Modal from './Modal.vue'
 
 import type { Event } from '../../types'
 
-const events = ref<Event[]>([]);
+const eventsRef = ref<Event[]>([])
 
-const currentEvent = ref<Event | null>(null);
-
-const dialogRef = ref(null)
-
-const openDialog = () => dialogRef.value?.showModal()
-const closeDialog = () => dialogRef.value?.close()
+const currentEventRef = ref<Event | null>(null)
 
 // Dependencies
 const dataHandler = new DataService()
@@ -30,7 +25,7 @@ function resizePicture(file_path: string): boolean {
 }
 
 function addMarker(map: L.Map): void {
-  events.value.forEach((event) => {
+  eventsRef.value.forEach((event) => {
     var marker = L.marker([event.locationX, event.locationY])
       .addTo(map)
       .bindPopup(
@@ -45,15 +40,12 @@ function addMarker(map: L.Map): void {
 
     marker.on('popupopen', () => {
       setCurrentEvent(event)
-  });
-
-    //marker.bindTooltip('my tooltip text').openTooltip()
+    })
   })
 }
 
 function setCurrentEvent(event: Event): void {
-  currentEvent.value = event
-  console.log("halo")
+  currentEventRef.value = event
 }
 
 async function mapSetup(): Promise<L.Map> {
@@ -67,13 +59,11 @@ async function mapSetup(): Promise<L.Map> {
 
   await fetchAllEvents()
 
-  console.log(events.value)
-
   return map
 }
 
 async function fetchAllEvents(): Promise<void> {
-  events.value = await dataHandler.fetchAllEvents()
+  eventsRef.value = await dataHandler.fetchAllEvents()
 }
 
 onMounted(async () => {
