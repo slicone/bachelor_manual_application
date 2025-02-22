@@ -25,7 +25,7 @@ db.serialize(() => {
       fees REAL,
       start_date TEXT NOT NULL,
       end_date TEXT NOT NULL,
-      file_path_main TEXT NOT NULL
+      image_name TEXT NOT NULL
       )`);
   });
 

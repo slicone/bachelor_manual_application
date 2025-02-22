@@ -12,5 +12,5 @@ export interface Event {
   fees: number
   start_date: string
   end_date: string
-  file_path_main: string
+  image_name: string
 }

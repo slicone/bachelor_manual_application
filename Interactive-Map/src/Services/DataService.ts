@@ -1,6 +1,6 @@
 import type { Event } from '../types'
 
-export class DataHandler {
+export class DataService {
   async fetchAllEvents(): Promise<Event[]> {
     const response = await fetch('http://localhost:3000/events')
     if (!response.ok) {
