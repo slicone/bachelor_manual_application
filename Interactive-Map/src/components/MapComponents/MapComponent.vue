@@ -10,9 +10,11 @@
 import { ref, onMounted, reactive, defineComponent } from 'vue'
 import L from 'leaflet'
 import { DataService } from '../../Services/DataService'
+import { EventValidator } from '../../Services/EventValidator'
+
 import ModalDetail from './ModalDetail.vue'
 import ModalCreate from './ModalCreate.vue'
-import { Modal } from 'bootstrap';
+import { Modal } from 'bootstrap'
 
 import type { Event } from '../../types'
 
@@ -23,29 +25,29 @@ const currentEventRef = ref<Event | null>(null)
 let map: L.Map
 
 // Dependencies
-const dataHandler = new DataService()
+const dataHandler = new DataService(new EventValidator())
 
 function addMarkerOnStartUp(): void {
   eventsRef.value.forEach((event) => {
-    addMarkerToMap(event);
+    addMarkerToMap(event)
   })
 }
 
-function addMarkerToMap(event: Event): void{
+function addMarkerToMap(event: Event): void {
   var marker = L.marker([event.locationX, event.locationY])
-      .addTo(map)
-      .bindPopup(
-        `<div class='event-popup'>
+    .addTo(map)
+    .bindPopup(
+      `<div class='event-popup'>
           <b>${event.description_short}</b>
           <img src=http://localhost:3000/images/${event.image_name}></img>
           <button id="event-button" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#detailModal">
             Erfahre mehr über das Event
           </button>
         </div>`,
-      )
-    marker.on('popupopen', () => {
-      setCurrentEvent(event)
-    })
+    )
+  marker.on('popupopen', () => {
+    setCurrentEvent(event)
+  })
 }
 
 function setCurrentEvent(event: Event): void {
@@ -70,7 +72,7 @@ async function fetchAllEvents(): Promise<void> {
   eventsRef.value = await dataHandler.fetchAllEvents()
 }
 
-function addEvent(): void {
+function addEventDoubleClick(): void {
   map.on('dblclick', function (e) {
     var lat = e.latlng.lat
     var lng = e.latlng.lng
@@ -79,16 +81,16 @@ function addEvent(): void {
     })
 
     myModal.show()
-   
+
     // TODO add marker if saved and added to database (successfull api call)
   })
 }
 
 onMounted(async () => {
-  await mapSetup();
-  addMarkerOnStartUp();
-  fetchAllEvents();
-  addEvent();
+  await mapSetup()
+  addMarkerOnStartUp()
+  fetchAllEvents()
+  addEventDoubleClick()
 })
 </script>
 
@@ -103,14 +105,12 @@ onMounted(async () => {
   z-index: 10;
 }
 
-
 .btn-add-marker {
   position: absolute;
   top: 80%;
   left: 10%;
   z-index: 20;
 }
-
 
 .event-popup {
   color: white;

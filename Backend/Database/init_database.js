@@ -22,7 +22,7 @@ db.serialize(() => {
       city TEXT NOT NULL,
       street TEXT NOT NULL,
       zip Number NOT NULL,
-      fees REAL,
+      fees REAL NOT NULL,
       start_date TEXT NOT NULL,
       end_date TEXT NOT NULL,
       image_name TEXT NOT NULL

@@ -7,22 +7,19 @@ const cors = require("cors");
 const app = express()
 const port = 3000
 
+import { Event } from "./types/DTOs"
+
 // Database Instance
-const db = require('./Services/DBConnectorService')();
+const db = require('../Services/DBConnectorService')();
 const imagesDir = "../Interactive-Map/public/"
 const resizedImageDir = "./Database/Files/ResizedImages"
 
 app.use(cors());
 app.use(bodyParser.json());
-app.use('/images', express.static(path.join(__dirname, 'Database/Images')));
-console.log(path.join(__dirname, 'Database/Images/'));
-
-app.get('/', (req, res) => {
-  res.send('<h1>Image Server</h1><img src="2.png" />');
-});
+app.use('/images', express.static(path.join(__dirname, '../Database/Images')));
 
 app.get('/events', (req, res) => {
-  db.all('SELECT * FROM Event', [], (err, rows) => {
+  db.all('SELECT * FROM Event', [], (err, rows: Event) => {
     if (err) {
       res.status(500).json({ error: 'Internal Server Error' });
     } else {
@@ -31,11 +28,39 @@ app.get('/events', (req, res) => {
   });
 })
 
+app.post("/event", (req, res) => {
+  const event: Event = req.body;
+  const stmt = db.prepare(`INSERT INTO Event (
+    user_id, name, description, description_short, locationX, locationY, city, street, zip, fees, start_date, end_date, image_name
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+  try {
+  stmt.run(
+    event.user_id,
+    event.name,
+    event.description,
+    event.description_short,
+    event.locationX,
+    event.locationY,
+    event.city,
+    event.street,
+    event.zip,
+    event.fees,
+    new Date(event.start_date).toISOString(),
+    new Date(event.end_date).toISOString(), 
+    event.image_name,
+  );
+  } catch (error) {
+    let message = error instanceof RangeError ? error.message : error;
+    res.status(400).send("Error adding event: " + message);
+  }
+
+  stmt.finalize();
+  res.send("Event added successfully");
+});
+
 // Route to handle image resizing via POST request
 app.post('/resize', async (req, res) => {
   const { file_path, width, height } = req.body; // Get data from the request body
-
-  console.log(!file_path, !width, !height);
 
   if (!file_path || !width || !height) {
     return res.status(400).send('Please provide imagePath, width, and height');
@@ -67,5 +92,5 @@ app.post('/resize', async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`listening on port ${port}`)
 })
