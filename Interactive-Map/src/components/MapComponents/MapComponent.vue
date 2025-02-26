@@ -2,7 +2,7 @@
   <div class="map-sidebar">
     <div id="map"></div>
     <ModalDetail v-if="currentEventRef !== null" :currentEvent="currentEventRef" />
-    <ModalCreate></ModalCreate>
+    <ModalCreate :localXRef=localXRef :localYRef=localYRef></ModalCreate>
   </div>
 </template>
 
@@ -19,8 +19,9 @@ import { Modal } from 'bootstrap'
 import type { Event } from '../../types'
 
 const eventsRef = ref<Event[]>([])
-
 const currentEventRef = ref<Event | null>(null)
+const localXRef = ref<number>(0);
+const localYRef = ref<number>(0);
 
 let map: L.Map
 
@@ -74,8 +75,8 @@ async function fetchAllEvents(): Promise<void> {
 
 function addEventDoubleClick(): void {
   map.on('dblclick', function (e) {
-    var lat = e.latlng.lat
-    var lng = e.latlng.lng
+    localXRef.value = e.latlng.lat
+    localYRef.value = e.latlng.lng
     var myModal = new Modal(document.getElementById('createModal'), {
       keyboard: true,
     })

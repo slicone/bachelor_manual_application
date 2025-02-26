@@ -1,5 +1,5 @@
 export interface Event {
-  id: number
+  id?: number
   user_id: number
   name: string
   description: string
@@ -14,3 +14,5 @@ export interface Event {
   end_date: string
   image_name: string
 }
+
+

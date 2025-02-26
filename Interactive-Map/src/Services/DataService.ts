@@ -22,7 +22,7 @@ export class DataService {
   }
 
   async addEvent(event: Event): Promise<boolean> {
-    if (this.eventValidator.isValid(event)) {
+    if (!this.eventValidator.isValid(event)) {
       return false
     }
 
@@ -40,4 +40,27 @@ export class DataService {
       return false
     }
   }
+
+  async uploadFiles(file: File[]): Promise<boolean> {
+    if (file.length === 0) {
+      return false;
+    };
+
+    const formData = new FormData()
+    file.forEach((file) => formData.append("images", file));
+
+    console.log(formData);
+
+    try {
+      const response = await fetch('http://localhost:3000/image/upload', {
+        method: 'POST',
+        body: formData,
+      })
+      return response.ok
+    } catch (error) {
+      console.error(error)
+      return false
+    }
+  }
+
 }
