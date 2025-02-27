@@ -1,4 +1,4 @@
-import type { Event } from '../types'
+import type { Event, InsertEventResponse, UploadFilesResponse } from '../types'
 import { EventValidator } from './EventValidator'
 
 export class DataService {
@@ -21,9 +21,9 @@ export class DataService {
     }
   }
 
-  async addEvent(event: Event): Promise<boolean> {
+  async addEvent(event: Event): Promise<InsertEventResponse> {
     if (!this.eventValidator.isValid(event)) {
-      return false
+      return { success: false, eventId: null }
     }
 
     try {
@@ -34,32 +34,36 @@ export class DataService {
         },
         body: JSON.stringify(event),
       })
-      return response.ok
+      let responseBody = await response.json()
+      return { success: response.ok, eventId: responseBody.eventId }
     } catch (error) {
       console.error(error)
-      return false
+      return { success: false, eventId: null }
     }
   }
 
-  async uploadFiles(file: File[]): Promise<[boolean, string[]]> {
+  async uploadFiles(file: File[], eventId: number | null = null): Promise<UploadFilesResponse> {
     if (file.length === 0) {
-      return [false, ['']]
-    };
+      return { success: false, filesName: [''] }
+    }
 
     const formData = new FormData()
-    file.forEach((file) => formData.append("images", file));
+    file.forEach((file) => formData.append('images', file))
+
+    if(eventId !== null) {
+      formData.append('eventId', eventId.toString());
+    }
 
     try {
       const response = await fetch('http://localhost:3000/image/upload', {
         method: 'POST',
         body: formData,
       })
-      let responseBody = await response.json();
-      return [response.ok, responseBody.files]
+      let responseBody = await response.json()
+      return { success: response.ok, filesName: responseBody.files }
     } catch (error) {
       console.error(error)
-      return [false, ['']]
+      return { success: false, filesName: [''] }
     }
   }
-
 }

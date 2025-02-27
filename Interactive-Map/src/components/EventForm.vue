@@ -3,7 +3,13 @@
     <div style="gap: 10px 20px">
       <div class="row g-2 row-gap">
         <div class="form-floating col">
-          <input v-model="eventName" :maxlength=maxLengthTitle class="form-control" id="floatingInputName" required />
+          <input
+            v-model="eventName"
+            :maxlength="maxLengthTitle"
+            class="form-control"
+            id="floatingInputName"
+            required
+          />
           <label for="floatingInputName" class="input-label">Event Name</label>
         </div>
         <div class="form-floating col">
@@ -25,18 +31,36 @@
 
       <div class="row g-2 row-gap">
         <div class="form-floating col">
-          <input v-model="startDate" type="datetime-local" class="form-control" id="floatingInputStart" required />
+          <input
+            v-model="startDate"
+            type="datetime-local"
+            class="form-control"
+            id="floatingInputStart"
+            required
+          />
           <label for="floatingInputStart" class="input-label">Beginn</label>
         </div>
         <div class="form-floating col">
-          <input v-model="endDate" type="datetime-local" class="form-control" id="floatingInputEnd" required />
+          <input
+            v-model="endDate"
+            type="datetime-local"
+            class="form-control"
+            id="floatingInputEnd"
+            required
+          />
           <label for="floatingInputEnd" class="input-label">Ende</label>
         </div>
       </div>
 
       <div class="row g-2 row-gap">
         <div class="form-floating col">
-          <input v-model="fees" type="number" class="form-control" id="floatingInputFees" required />
+          <input
+            v-model="fees"
+            type="number"
+            class="form-control"
+            id="floatingInputFees"
+            required
+          />
           <label for="floatingInputFees" class="input-label">Gebühren</label>
         </div>
         <div class="form-floating col">
@@ -58,7 +82,7 @@
 
       <div class="mb-3 row-gap">
         <label for="formFile" class="form-label">Titelbild</label>
-        <input class="form-control" type="file" id="formFile" @change="handleFileChange" required/>
+        <input class="form-control" type="file" id="formFile" @change="handleFileChange" required />
       </div>
 
       <div class="mb-3 row-gap">
@@ -68,9 +92,15 @@
 
       <div class="modal-footer">
         <div v-if="!submitSuccessfull" style="color: red">Error Submitting Form</div>
-        <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Submit</button>
-        <button type="button" class="btn btn-secondary" @click="submitSuccessfull = true" data-bs-dismiss="modal">Close</button>
-      
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <button
+          type="button"
+          class="btn btn-secondary"
+          @click="submitSuccessfull = true"
+          data-bs-dismiss="modal"
+        >
+          Close
+        </button>
       </div>
     </div>
   </form>
@@ -89,7 +119,7 @@
 <script setup lang="ts">
 import { DataService } from '../Services/DataService'
 import { EventValidator } from '../Services/EventValidator'
-import type { Event as EventDTO } from '../types'
+import type { Event as EventDTO, InsertEventResponse, UploadFilesResponse} from '../types'
 
 import { Modal } from 'bootstrap'
 import { Ref, ref } from 'vue'
@@ -107,23 +137,20 @@ const endDate = ref<string>('')
 const fees = ref<number>(0)
 const shortDesc = ref<string>('')
 const desc = ref<string>('')
-const mainFile = ref<File>(null);
-const selectedFiles = ref<File[]>([]);
-const submitSuccessfull = ref<boolean>(true);
+const mainFile = ref<File>(null)
+const selectedFiles = ref<File[]>([])
+const submitSuccessfull = ref<boolean>(true)
 
 const dataHandler = new DataService(new EventValidator())
 
 const props = defineProps<{
-  localXRef: number;
-  localYRef: number;
-  addMarker: (event: EventDTO) => void;
-}>();
-
-
+  localXRef: number
+  localYRef: number
+  addMarker: (event: EventDTO) => void
+}>()
 
 async function handleSubmit(event: Event): Promise<void> {
-  let [successFile, fileName] = await uploadFile();
-  let [successFiles, fileNames] = await uploadFiles();
+  let { success: successFile, filesName: fileName } = await uploadFile();
 
   let eventInfo: EventDTO = {
     user_id: 0,
@@ -139,61 +166,60 @@ async function handleSubmit(event: Event): Promise<void> {
     image_name: fileName[0],
     locationX: props.localXRef,
     locationY: props.localYRef,
-  };
-
-  submitSuccessfull.value = await dataHandler.addEvent(eventInfo);
-  
-  if (submitSuccessfull.value) {
-    var modal = new Modal(document.getElementById('createModal'), {
-      keyboard: true,
-    })
-    modal.hide();
   }
 
-  props.addMarker(eventInfo);
+  let { success: successEvent, eventId: eventId } = await dataHandler.addEvent(eventInfo)
 
-  clearForm();
+  submitSuccessfull.value = successEvent;
+
+   let { success: successFiles, filesName: filesNames } = await uploadFiles(eventId);
+
+  if (submitSuccessfull.value) {
+    var modal = new Modal(document.getElementById('createModal'))
+    //modal.hide() // TODO doesnt work, eventuell hinzufügen von element in html mit databs...
+  }
+
+  props.addMarker(eventInfo)
+
+  clearForm()
 }
 
-
 function clearForm(): void {
-  eventName.value = '';
-  city.value = '';
-  street.value = '';
-  zip.value = 0;
-  startDate.value = '';
-  endDate.value = '';
-  fees.value = 0;
-  shortDesc.value = '';
-  desc.value = '';
-  mainFile.value = null;
-  selectedFiles.value = [];
+  eventName.value = ''
+  city.value = ''
+  street.value = ''
+  zip.value = 0
+  startDate.value = ''
+  endDate.value = ''
+  fees.value = 0
+  shortDesc.value = ''
+  desc.value = ''
+  mainFile.value = null
+  selectedFiles.value = []
 }
 
 function handleFileChange(event: Event) {
-  console.log(props.localXRef);
-console.log(props.localYRef);
-  const target = event.target as HTMLInputElement;
-    console.log(target.files);
+  console.log(props.localXRef)
+  console.log(props.localYRef)
+  const target = event.target as HTMLInputElement
+  console.log(target.files)
   if (target.files) {
-    mainFile.value = target.files[0];
+    mainFile.value = target.files[0]
   }
 }
 
 function handleFilesChange(event: Event) {
-  const target = event.target as HTMLInputElement;
+  const target = event.target as HTMLInputElement
   if (target.files) {
-    selectedFiles.value = Array.from(target.files);
+    selectedFiles.value = Array.from(target.files)
   }
 }
 
-async function uploadFiles(): Promise<[boolean, string[]]> {
-  return await dataHandler.uploadFiles(selectedFiles.value);
+async function uploadFiles(entryId: number): Promise<UploadFilesResponse> {
+  return await dataHandler.uploadFiles(selectedFiles.value, entryId)
 }
 
-async function uploadFile(): Promise<[boolean, string[]]> {
-  return await dataHandler.uploadFiles([mainFile.value]);
+async function uploadFile(): Promise<UploadFilesResponse> {
+  return await dataHandler.uploadFiles([mainFile.value])
 }
-
-
 </script>

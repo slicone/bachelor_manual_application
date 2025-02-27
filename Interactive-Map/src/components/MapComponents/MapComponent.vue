@@ -2,7 +2,11 @@
   <div class="map-sidebar">
     <div id="map"></div>
     <ModalDetail v-if="currentEventRef !== null" :currentEvent="currentEventRef" />
-    <ModalCreate :localXRef=localXRef :localYRef=localYRef :addMarker=addMarkerToMap ></ModalCreate>
+    <ModalCreate
+      :localXRef="localXRef"
+      :localYRef="localYRef"
+      :addMarker="addMarkerToMap"
+    ></ModalCreate>
   </div>
 </template>
 
@@ -20,8 +24,8 @@ import type { Event } from '../../types'
 
 const eventsRef = ref<Event[]>([])
 const currentEventRef = ref<Event | null>(null)
-const localXRef = ref<number>(0);
-const localYRef = ref<number>(0);
+const localXRef = ref<number>(0)
+const localYRef = ref<number>(0)
 
 let map: L.Map
 

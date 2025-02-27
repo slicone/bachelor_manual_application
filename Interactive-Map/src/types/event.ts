@@ -14,5 +14,3 @@ export interface Event {
   end_date: string
   image_name: string
 }
-
-
