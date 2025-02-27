@@ -2,12 +2,12 @@
   <div class="map-sidebar">
     <div id="map"></div>
     <ModalDetail v-if="currentEventRef !== null" :currentEvent="currentEventRef" />
-    <ModalCreate :localXRef=localXRef :localYRef=localYRef></ModalCreate>
+    <ModalCreate :localXRef=localXRef :localYRef=localYRef :addMarker=addMarkerToMap ></ModalCreate>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, reactive, defineComponent } from 'vue'
+import { ref, onMounted, reactive, defineComponent, computed } from 'vue'
 import L from 'leaflet'
 import { DataService } from '../../Services/DataService'
 import { EventValidator } from '../../Services/EventValidator'
@@ -77,13 +77,11 @@ function addEventDoubleClick(): void {
   map.on('dblclick', function (e) {
     localXRef.value = e.latlng.lat
     localYRef.value = e.latlng.lng
-    var myModal = new Modal(document.getElementById('createModal'), {
+    var modal = new Modal(document.getElementById('createModal'), {
       keyboard: true,
     })
 
-    myModal.show()
-
-    // TODO add marker if saved and added to database (successfull api call)
+    modal.show()
   })
 }
 

@@ -41,25 +41,24 @@ export class DataService {
     }
   }
 
-  async uploadFiles(file: File[]): Promise<boolean> {
+  async uploadFiles(file: File[]): Promise<[boolean, string[]]> {
     if (file.length === 0) {
-      return false;
+      return [false, ['']]
     };
 
     const formData = new FormData()
     file.forEach((file) => formData.append("images", file));
-
-    console.log(formData);
 
     try {
       const response = await fetch('http://localhost:3000/image/upload', {
         method: 'POST',
         body: formData,
       })
-      return response.ok
+      let responseBody = await response.json();
+      return [response.ok, responseBody.files]
     } catch (error) {
       console.error(error)
-      return false
+      return [false, ['']]
     }
   }
 

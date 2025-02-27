@@ -67,9 +67,10 @@
       </div>
 
       <div class="modal-footer">
-        <button type="submit" class="btn btn-primary">Submit</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <div v-if="submitSuccessfull">Error Submitting Form</div>
+        <div v-if="!submitSuccessfull" style="color: red">Error Submitting Form</div>
+        <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Submit</button>
+        <button type="button" class="btn btn-secondary" @click="submitSuccessfull = true" data-bs-dismiss="modal">Close</button>
+      
       </div>
     </div>
   </form>
@@ -88,6 +89,9 @@
 <script setup lang="ts">
 import { DataService } from '../Services/DataService'
 import { EventValidator } from '../Services/EventValidator'
+import type { Event as EventDTO } from '../types'
+
+import { Modal } from 'bootstrap'
 import { Ref, ref } from 'vue'
 
 const maxLengthDesc = 20
@@ -112,13 +116,16 @@ const dataHandler = new DataService(new EventValidator())
 const props = defineProps<{
   localXRef: number;
   localYRef: number;
+  addMarker: (event: EventDTO) => void;
 }>();
 
-async function handleSubmit(event: Event): Promise<void> {
-  let mainFileName = uploadFile();
-  let filenames = uploadFiles();
 
-  submitSuccessfull.value = await dataHandler.addEvent({
+
+async function handleSubmit(event: Event): Promise<void> {
+  let [successFile, fileName] = await uploadFile();
+  let [successFiles, fileNames] = await uploadFiles();
+
+  let eventInfo: EventDTO = {
     user_id: 0,
     name: eventName.value,
     city: city.value,
@@ -129,18 +136,22 @@ async function handleSubmit(event: Event): Promise<void> {
     fees: fees.value,
     description_short: shortDesc.value,
     description: desc.value,
-    image_name: mainFile.value.name, // take mainFileName
+    image_name: fileName[0],
     locationX: props.localXRef,
     locationY: props.localYRef,
-  });
+  };
 
-  if(!submitSuccessfull.value) {
-    clearForm();
-    return;
+  submitSuccessfull.value = await dataHandler.addEvent(eventInfo);
+  
+  if (submitSuccessfull.value) {
+    var modal = new Modal(document.getElementById('createModal'), {
+      keyboard: true,
+    })
+    modal.hide();
   }
 
-  // TODO react to failure of upload Files
-  
+  props.addMarker(eventInfo);
+
   clearForm();
 }
 
@@ -155,8 +166,8 @@ function clearForm(): void {
   fees.value = 0;
   shortDesc.value = '';
   desc.value = '';
-  mainFile.value = null; // TODO doesnt work
-  selectedFiles.value = []; // TODO doesnt work
+  mainFile.value = null;
+  selectedFiles.value = [];
 }
 
 function handleFileChange(event: Event) {
@@ -176,12 +187,12 @@ function handleFilesChange(event: Event) {
   }
 }
 
-function uploadFiles() {
-  dataHandler.uploadFiles(selectedFiles.value);
+async function uploadFiles(): Promise<[boolean, string[]]> {
+  return await dataHandler.uploadFiles(selectedFiles.value);
 }
 
-function uploadFile() {
-  dataHandler.uploadFiles([mainFile.value]);
+async function uploadFile(): Promise<[boolean, string[]]> {
+  return await dataHandler.uploadFiles([mainFile.value]);
 }
 
 

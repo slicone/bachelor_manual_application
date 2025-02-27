@@ -20,7 +20,7 @@
             ></button>
           </div>
           <div class="modal-body">
-            <EventForm :localXRef=localXRef :localYRef=localYRef ></EventForm> />
+            <EventForm :localXRef=localXRef :localYRef=localYRef :addMarker=addMarker />
           </div>
         </div>
       </div>
@@ -34,5 +34,6 @@ import EventForm from '../EventForm.vue'
 defineProps<{
   localXRef: number;
   localYRef: number;
+  addMarker: (event: Event) => void;
 }>();
 </script>
