@@ -1,4 +1,4 @@
-import type { Event, InsertEventResponse, UploadFilesResponse } from '../types'
+import type { Event, InsertEventResponse, UploadFilesResponse, ImageNamesResponse } from '../types'
 import { EventValidator } from './EventValidator'
 
 export class DataService {
@@ -50,8 +50,8 @@ export class DataService {
     const formData = new FormData()
     file.forEach((file) => formData.append('images', file))
 
-    if(eventId !== null) {
-      formData.append('eventId', eventId.toString());
+    if (eventId !== null) {
+      formData.append('eventId', eventId.toString())
     }
 
     try {
@@ -64,6 +64,17 @@ export class DataService {
     } catch (error) {
       console.error(error)
       return { success: false, filesName: [''] }
+    }
+  }
+
+  async getImageNamesForEvent(eventId: number): Promise<ImageNamesResponse> {
+    try {
+      const response = await fetch(`http://localhost:3000/image/upload?eventId=${eventId}`)
+      let responseBody = await response.json()
+      return { success: response.ok, fileNames: responseBody.fileNames }
+    } catch (error) {
+      console.error(error)
+      return { success: false, fileNames: [''] }
     }
   }
 }

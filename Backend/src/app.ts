@@ -32,6 +32,23 @@ const storage = multer.diskStorage({
   }
 });
 
+
+app.get('/image/upload', (req, res) => {
+  let eventId = req.query.eventId;
+
+  if (eventId === null && eventId === undefined){
+    return res.status(400).json({ message: "mandatory eventId missing" });
+  }
+
+  db.all('SELECT i.file_path FROM Image i WHERE i.event_id = ? ', [eventId], (err, row: Event) => {
+    if (err) {
+      res.status(500).json({ error: 'Internal Server Error' });
+    } else {
+      res.json({fileNames: row})
+    }
+  });
+})
+
 const upload = multer({ storage });
 
 app.post("/image/upload", upload.array("images"), (req, res) => {

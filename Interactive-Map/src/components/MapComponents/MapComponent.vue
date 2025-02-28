@@ -1,7 +1,7 @@
 <template>
   <div class="map-sidebar">
     <div id="map"></div>
-    <ModalDetail v-if="currentEventRef !== null" :currentEvent="currentEventRef" />
+    <ModalDetail v-if="eventDataStore.currentEvent !== null" />
     <ModalCreate
       :localXRef="localXRef"
       :localYRef="localYRef"
@@ -15,6 +15,8 @@ import { ref, onMounted, reactive, defineComponent, computed } from 'vue'
 import L from 'leaflet'
 import { DataService } from '../../Services/DataService'
 import { EventValidator } from '../../Services/EventValidator'
+import { useEventData } from '../../stores/eventStore'
+const eventDataStore = useEventData();
 
 import ModalDetail from './ModalDetail.vue'
 import ModalCreate from './ModalCreate.vue'
@@ -23,7 +25,6 @@ import { Modal } from 'bootstrap'
 import type { Event } from '../../types'
 
 const eventsRef = ref<Event[]>([])
-const currentEventRef = ref<Event | null>(null)
 const localXRef = ref<number>(0)
 const localYRef = ref<number>(0)
 
@@ -43,20 +44,19 @@ function addMarkerToMap(event: Event): void {
     .addTo(map)
     .bindPopup(
       `<div class='event-popup'>
-          <b>${event.description_short}</b>
+          <b>${event.name}</b>
           <img src=http://localhost:3000/images/${event.image_name}></img>
+          <b>${event.description_short}</b>
           <button id="event-button" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#detailModal">
             Erfahre mehr über das Event
           </button>
         </div>`,
     )
   marker.on('popupopen', () => {
-    setCurrentEvent(event)
+    console.log(event);
+    eventDataStore.setCurrentEvent(event)
+    eventDataStore.setImageNames(event.id)
   })
-}
-
-function setCurrentEvent(event: Event): void {
-  currentEventRef.value = event
 }
 
 async function mapSetup(): Promise<L.Map> {
@@ -121,7 +121,6 @@ onMounted(async () => {
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  background-color: b;
 }
 
 .event-popup img {

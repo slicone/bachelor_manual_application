@@ -95,6 +95,7 @@
         <button type="submit" class="btn btn-primary">Submit</button>
         <button
           type="button"
+          id="eventCreateClose"
           class="btn btn-secondary"
           @click="submitSuccessfull = true"
           data-bs-dismiss="modal"
@@ -119,7 +120,7 @@
 <script setup lang="ts">
 import { DataService } from '../Services/DataService'
 import { EventValidator } from '../Services/EventValidator'
-import type { Event as EventDTO, InsertEventResponse, UploadFilesResponse} from '../types'
+import type { AddEvent, InsertEventResponse, UploadFilesResponse } from '../types'
 
 import { Modal } from 'bootstrap'
 import { Ref, ref } from 'vue'
@@ -150,16 +151,17 @@ const props = defineProps<{
 }>()
 
 async function handleSubmit(event: Event): Promise<void> {
-  let { success: successFile, filesName: fileName } = await uploadFile();
+  let { filesName: fileName } = await uploadFile()
 
-  let eventInfo: EventDTO = {
+  let eventInfo: AddEvent = {
     user_id: 0,
     name: eventName.value,
     city: city.value,
     street: street.value,
     zip: zip.value,
-    start_date: startDate.value,
-    end_date: endDate.value,
+    // remove milliseconds
+    start_date: new Date(startDate.value).toISOString().split('.')[0],
+    end_date: new Date(endDate.value).toISOString().split('.')[0],
     fees: fees.value,
     description_short: shortDesc.value,
     description: desc.value,
@@ -168,18 +170,19 @@ async function handleSubmit(event: Event): Promise<void> {
     locationY: props.localYRef,
   }
 
+  console.log(new Date(startDate.value).toISOString().split('.')[0])
+
   let { success: successEvent, eventId: eventId } = await dataHandler.addEvent(eventInfo)
 
-  submitSuccessfull.value = successEvent;
+  submitSuccessfull.value = successEvent
 
-   let { success: successFiles, filesName: filesNames } = await uploadFiles(eventId);
+  await uploadFiles(eventId)
 
   if (submitSuccessfull.value) {
-    var modal = new Modal(document.getElementById('createModal'))
-    //modal.hide() // TODO doesnt work, eventuell hinzufügen von element in html mit databs...
+    props.addMarker(eventInfo)
+    const button = document.getElementById('eventCreateClose') as HTMLButtonElement
+    button.click()
   }
-
-  props.addMarker(eventInfo)
 
   clearForm()
 }
@@ -199,8 +202,6 @@ function clearForm(): void {
 }
 
 function handleFileChange(event: Event) {
-  console.log(props.localXRef)
-  console.log(props.localYRef)
   const target = event.target as HTMLInputElement
   console.log(target.files)
   if (target.files) {
