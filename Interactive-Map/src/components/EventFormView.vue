@@ -14,14 +14,24 @@
             <label for="floatingInputName" class="input-label">Event Name</label>
           </div>
           <div class="form-floating col">
-            <input v-model="eventDataStore.currentEvent.city" class="form-control" id="floatingInputCity" readonly />
+            <input
+              v-model="eventDataStore.currentEvent.city"
+              class="form-control"
+              id="floatingInputCity"
+              readonly
+            />
             <label for="floatingInputCity" class="input-label">Stadt</label>
           </div>
         </div>
 
         <div class="row g-2 row-gap">
           <div class="form-floating col">
-            <input v-model="eventDataStore.currentEvent.street" class="form-control" id="floatingInputStreet" readonly />
+            <input
+              v-model="eventDataStore.currentEvent.street"
+              class="form-control"
+              id="floatingInputStreet"
+              readonly
+            />
             <label for="floatingInputStreet" class="input-label">Straße</label>
           </div>
           <div class="form-floating col">
@@ -110,8 +120,7 @@
 import type { Event } from '../types'
 import ImageCarousel from './ImageCarousel.vue'
 import { useEventData } from '../stores/eventStore'
-const eventDataStore = useEventData();
-
+const eventDataStore = useEventData()
 </script>
 
 <style scoped>

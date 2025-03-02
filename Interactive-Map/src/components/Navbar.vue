@@ -21,7 +21,7 @@
         aria-labelledby="offcanvasNavbarLabel"
       >
         <div class="offcanvas-header">
-          <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Offcanvas</h5>
+          <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Event Filter</h5>
           <button
             type="button"
             class="btn-close"
@@ -30,44 +30,146 @@
           ></button>
         </div>
         <div class="offcanvas-body">
-          <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="#">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Link</a>
-            </li>
-            <li class="nav-item dropdown">
-              <a
-                class="nav-link dropdown-toggle"
-                href="#"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                Dropdown
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#">Action</a></li>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-                <li>
-                  <hr class="dropdown-divider" />
-                </li>
-                <li><a class="dropdown-item" href="#">Something else here</a></li>
-              </ul>
-            </li>
-          </ul>
-          <form class="d-flex mt-3" role="search">
-            <input
-              class="form-control me-2"
-              type="search"
-              placeholder="Search"
-              aria-label="Search"
-            />
-            <button class="btn btn-outline-success" type="submit">Search</button>
+          <form @submit.prevent="handleSubmit">
+            <div class="nav-item form-floating row-gap">
+              <input v-model="eventName" class="form-control" id="floatingInputValue" />
+              <label for="floatingInputValue">Name des Events</label>
+            </div>
+
+            <div class="form-floating row-gap">
+              <input
+                v-model="startDate"
+                type="datetime-local"
+                class="form-control"
+                id="floatingInputStart"
+              />
+              <label for="floatingInputStart" class="input-label">Beginn</label>
+            </div>
+            <div class="form-floating col row-gap">
+              <input
+                v-model="endDate"
+                type="datetime-local"
+                class="form-control"
+                id="floatingInputEnd"
+              />
+              <label for="floatingInputEnd" class="input-label">Ende</label>
+            </div>
+
+            <div class="row row-gap">
+              <b>Standort X Spanne</b>
+              <div class="col">
+                <div class="nav-item form-floating">
+                  <input
+                    type="number"
+                    v-model="xStart"
+                    class="form-control"
+                    id="floatingInputValue"
+                  />
+                  <label for="floatingInputValue">Von X</label>
+                </div>
+              </div>
+              <div class="col">
+                <div class="nav-item form-floating">
+                  <input
+                    type="number"
+                    v-model="xEnd"
+                    class="form-control"
+                    id="floatingInputValue"
+                  />
+                  <label for="floatingInputValue">Bis X</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="row row-gap">
+              <b>Standort Y Spanne</b>
+              <div class="col">
+                <div class="nav-item form-floating">
+                  <input
+                    type="number"
+                    v-model="yStart"
+                    class="form-control"
+                    id="floatingInputValue"
+                  />
+                  <label for="floatingInputValue">Von Y</label>
+                </div>
+              </div>
+              <div class="col">
+                <div class="nav-item form-floating">
+                  <input
+                    type="number"
+                    v-model="yEnd"
+                    class="form-control"
+                    id="floatingInputValue"
+                  />
+                  <label for="floatingInputValue">Bis Y</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-check row-gap">
+              <input
+                v-model="noPrice"
+                class="form-check-input"
+                type="checkbox"
+                id="flexCheckDefault"
+              />
+              <label class="form-check-label" for="flexCheckDefault"> Event ist kostenlos </label>
+            </div>
+
+            <div class="footer-button">
+              <button type="submit" class="btn btn-outline-warning">Apply</button>
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">
+                Close
+              </button>
+            </div>
           </form>
         </div>
       </div>
     </div>
   </nav>
 </template>
+
+<script setup lang="ts">
+import Vue, { ref } from 'vue'
+import { EventFilter } from '../Services/EventFilter'
+import { useEventData } from '../stores/eventStore'
+import { useMarkerStore } from '../stores/markerStore'
+
+const markerStore = useMarkerStore()
+const eventDataStore = useEventData()
+
+const eventName = ref<string>('')
+const startDate = ref<string>('')
+const endDate = ref<string>('')
+const xStart = ref<string>('')
+const xEnd = ref<string>('')
+const yStart = ref<string>('')
+const yEnd = ref<string>('')
+const noPrice = ref<boolean>(false)
+
+function handleSubmit() {
+  let eventFilter = new EventFilter(eventDataStore.allEventsUnfiltered)
+  eventFilter.setNameFilter(eventName.value)
+  let filteredList = eventFilter.getFilteredEventList()
+
+  eventDataStore.setAllEventFiltered(filteredList)
+  console.log(eventDataStore.allEventFiltered)
+
+  markerStore.markerGroup.clearLayers()
+  markerStore.addMarkerOnStartUp()
+}
+</script>
+
+<style scoped>
+.row-gap {
+  margin-bottom: 10px;
+  gap: 10px;
+}
+
+.footer-button {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+</style>

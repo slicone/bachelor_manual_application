@@ -1,4 +1,10 @@
-import type { Event, InsertEventResponse, UploadFilesResponse, ImageNamesResponse } from '../types'
+import type {
+  Event,
+  InsertEventResponse,
+  UploadFilesResponse,
+  ImageNamesResponse,
+  AddEvent,
+} from '../types'
 import { EventValidator } from './EventValidator'
 
 export class DataService {
@@ -21,7 +27,7 @@ export class DataService {
     }
   }
 
-  async addEvent(event: Event): Promise<InsertEventResponse> {
+  async addEvent(event: AddEvent): Promise<InsertEventResponse> {
     if (!this.eventValidator.isValid(event)) {
       return { success: false, eventId: null }
     }

@@ -1,13 +1,13 @@
-import type { Event } from '../types'
+import type { AddEvent } from '../types'
 
 export class EventValidator {
-  private isEventValid(event: Event): boolean {
+  private isEventValid(event: AddEvent): boolean {
     return Object.values(event).every(
       (value) => value !== null && value !== undefined && value !== '',
     )
   }
 
-  public isValid(event: Event): boolean {
+  public isValid(event: AddEvent): boolean {
     if (!this.isEventValid(event)) {
       // TODO Logging
       return false

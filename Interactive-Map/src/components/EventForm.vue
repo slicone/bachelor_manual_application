@@ -120,10 +120,13 @@
 <script setup lang="ts">
 import { DataService } from '../Services/DataService'
 import { EventValidator } from '../Services/EventValidator'
-import type { AddEvent, InsertEventResponse, UploadFilesResponse } from '../types'
+import type { Event as EventDTO, InsertEventResponse, UploadFilesResponse } from '../types'
 
 import { Modal } from 'bootstrap'
 import { Ref, ref } from 'vue'
+
+import { useMarkerStore } from '../stores/markerStore'
+const markerStore = useMarkerStore()
 
 const maxLengthDesc = 20
 const maxLengthTitle = 15
@@ -147,13 +150,12 @@ const dataHandler = new DataService(new EventValidator())
 const props = defineProps<{
   localXRef: number
   localYRef: number
-  addMarker: (event: EventDTO) => void
 }>()
 
-async function handleSubmit(event: Event): Promise<void> {
+async function handleSubmit(): Promise<void> {
   let { filesName: fileName } = await uploadFile()
 
-  let eventInfo: AddEvent = {
+  let eventInfo: EventDTO = {
     user_id: 0,
     name: eventName.value,
     city: city.value,
@@ -170,8 +172,6 @@ async function handleSubmit(event: Event): Promise<void> {
     locationY: props.localYRef,
   }
 
-  console.log(new Date(startDate.value).toISOString().split('.')[0])
-
   let { success: successEvent, eventId: eventId } = await dataHandler.addEvent(eventInfo)
 
   submitSuccessfull.value = successEvent
@@ -179,7 +179,7 @@ async function handleSubmit(event: Event): Promise<void> {
   await uploadFiles(eventId)
 
   if (submitSuccessfull.value) {
-    props.addMarker(eventInfo)
+    markerStore.addMarkerToMap(eventInfo)
     const button = document.getElementById('eventCreateClose') as HTMLButtonElement
     button.click()
   }
