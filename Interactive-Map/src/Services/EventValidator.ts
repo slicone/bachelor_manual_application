@@ -1,4 +1,4 @@
-import type { AddEvent } from '../types'
+import type { Event } from '../types'
 
 export class EventValidator {
   private isEventValid(event: AddEvent): boolean {
@@ -7,13 +7,13 @@ export class EventValidator {
     )
   }
 
-  public isValid(event: AddEvent): boolean {
+  public isValid(event: Event): boolean {
     if (!this.isEventValid(event)) {
       // TODO Logging
       return false
     }
 
-    if (event.description.length > 20) {
+    if (event.description_short.length > 20) {
       // TODO Logging
       return false
     }

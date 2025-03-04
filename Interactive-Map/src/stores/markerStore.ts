@@ -37,6 +37,8 @@ export const useMarkerStore = defineStore('markerStore', () => {
 
   const addMarkerToMap = (event: Event) => {
     if (markerGroup !== null) {
+      console.log(event.image_name);
+      
       var marker = L.marker([event.locationX, event.locationY])
         .addTo(markerGroup.value as L.LayerGroup)
         .bindPopup(

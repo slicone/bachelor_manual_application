@@ -73,7 +73,7 @@ export class DataService {
     }
   }
 
-  async getImageNamesForEvent(eventId: number): Promise<ImageNamesResponse> {
+  async getImageNamesForEvent(eventId: number | null): Promise<ImageNamesResponse> {
     try {
       const response = await fetch(`http://localhost:3000/image/upload?eventId=${eventId}`)
       let responseBody = await response.json()

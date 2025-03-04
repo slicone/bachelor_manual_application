@@ -61,6 +61,7 @@
                 <div class="nav-item form-floating">
                   <input
                     type="number"
+                    step="any"
                     v-model="xStart"
                     class="form-control"
                     id="floatingInputValue"
@@ -72,6 +73,7 @@
                 <div class="nav-item form-floating">
                   <input
                     type="number"
+                    step="any"
                     v-model="xEnd"
                     class="form-control"
                     id="floatingInputValue"
@@ -87,6 +89,7 @@
                 <div class="nav-item form-floating">
                   <input
                     type="number"
+                    step="any"
                     v-model="yStart"
                     class="form-control"
                     id="floatingInputValue"
@@ -98,6 +101,7 @@
                 <div class="nav-item form-floating">
                   <input
                     type="number"
+                    step="any"
                     v-model="yEnd"
                     class="form-control"
                     id="floatingInputValue"
@@ -142,22 +146,34 @@ const eventDataStore = useEventData()
 const eventName = ref<string>('')
 const startDate = ref<string>('')
 const endDate = ref<string>('')
-const xStart = ref<string>('')
-const xEnd = ref<string>('')
-const yStart = ref<string>('')
-const yEnd = ref<string>('')
+const xStart = ref<number | string | null>(null)
+const xEnd = ref<number | string | null>(null)
+const yStart = ref<number | string | null>(null)
+const yEnd = ref<number | string | null>(null)
 const noPrice = ref<boolean>(false)
+
+function setMarkerAfterFilter() {
+  markerStore.markerGroup.clearLayers()
+  markerStore.addMarkerOnStartUp()
+}
+
+function setEventFilterList(eventFilter: EventFilter) {
+  let filteredList = eventFilter.getFilteredEventList()
+  eventDataStore.setAllEventFiltered(filteredList)
+}
 
 function handleSubmit() {
   let eventFilter = new EventFilter(eventDataStore.allEventsUnfiltered)
   eventFilter.setNameFilter(eventName.value)
-  let filteredList = eventFilter.getFilteredEventList()
+  eventFilter.setDateBeginnFilter(startDate.value)
+  eventFilter.setDateEndFilter(endDate.value)
+  eventFilter.setLocationXSpanFilter(xStart.value, xEnd.value)
+  eventFilter.setLocationYSpanFilter(yStart.value, yEnd.value)
+  eventFilter.setEventIsFreeFilter(noPrice.value)
 
-  eventDataStore.setAllEventFiltered(filteredList)
-  console.log(eventDataStore.allEventFiltered)
+  setEventFilterList(eventFilter)
 
-  markerStore.markerGroup.clearLayers()
-  markerStore.addMarkerOnStartUp()
+  setMarkerAfterFilter()
 }
 </script>
 
