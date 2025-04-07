@@ -10,7 +10,7 @@ export const useEventData = defineStore('eventStore', () => {
   const imageNames = ref<string[]>([])
 
   const setImageNames = async (eventId: number | null) => {
-    let { fileNames } = await dataHandler.getImageNamesForEvent(eventId)
+    const { fileNames } = await dataHandler.getImageNamesForEvent(eventId)
     imageNames.value = fileNames
   }
 

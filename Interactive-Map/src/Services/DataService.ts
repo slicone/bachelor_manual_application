@@ -40,7 +40,7 @@ export class DataService {
         },
         body: JSON.stringify(event),
       })
-      let responseBody = await response.json()
+      const responseBody = await response.json()
       return { success: response.ok, eventId: responseBody.eventId }
     } catch (error) {
       console.error(error)
@@ -65,7 +65,7 @@ export class DataService {
         method: 'POST',
         body: formData,
       })
-      let responseBody = await response.json()
+      const responseBody = await response.json()
       return { success: response.ok, filesName: responseBody.files }
     } catch (error) {
       console.error(error)
@@ -76,7 +76,7 @@ export class DataService {
   async getImageNamesForEvent(eventId: number | null): Promise<ImageNamesResponse> {
     try {
       const response = await fetch(`http://localhost:3000/image/upload?eventId=${eventId}`)
-      let responseBody = await response.json()
+      const responseBody = await response.json()
       return { success: response.ok, fileNames: responseBody.fileNames }
     } catch (error) {
       console.error(error)

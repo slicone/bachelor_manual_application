@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Plato - Interactive-Map/src/components/tsfiles/EventForm.ts</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link href="../../assets/css/vendor/morris.css" rel="stylesheet" type="text/css">
+  <link href="../../assets/css/vendor/bootstrap.css" rel="stylesheet" type="text/css">
+  <link href="../../assets/css/vendor/font-awesome.css" rel="stylesheet" type="text/css">
+  <link href="../../assets/css/vendor/codemirror.css" rel="stylesheet" type="text/css">
+  <link href="../../assets/css/plato.css" rel="stylesheet" type="text/css">
+  <link href="../../assets/css/plato-file.css" rel="stylesheet" type="text/css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="https://github.com/the-simian/es6-plato">ES6 Plato on Github</a>
+    <ul class="nav navbar-nav">
+      <li>
+        <a href="../../index.html">Report Home</a>
+      </li>
+      <li class="active">
+        <a href="display.html">Summary Display</a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="jumbotron">
+  <div class="container">
+    <h1>Interactive-Map/src/components/tsfiles/EventForm.ts</h1>
+  </div>
+</div>
+
+<div class="container aggregate-stats">
+  <div class="row">
+    <div class="col-md-6">
+      <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"  data-container="body"></i></a></h2>
+      <p class="stat">57.83</p>
+    </div>
+    <div class="col-md-6">
+      <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h2>
+      <p class="stat">105</p>
+    </div>
+  </div>
+  <div class="row historical">
+    <div class="col-md-6">
+      <p id="chart_historical_maint" class="chart"></p>
+    </div>
+    <div class="col-md-6">
+      <p id="chart_historical_sloc" class="chart"></p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty" data-container="body"></i></a></h2>
+      <p class="stat">16.36</p>
+    </div>
+    <div class="col-md-6">
+      <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs" data-container="body"></i></a></h2>
+      <p class="stat">0.83</p>
+    </div>
+  </div>
+</div>
+
+<div class="container charts">
+  <div class="row">
+    <h2 class="header">Function weight</h2>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h3 class="chart-header">By Complexity <a href="http://en.wikipedia.org/wiki/Cyclomatic_complexity"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="This metric counts the number of distinct paths through a block of code. Lower values are better." data-original-title="Cyclomatic Complexity" data-container="body"></i></a></h3>
+      <div id="fn-by-complexity" class="stat"></div>
+    </div>
+    <div class="col-md-6">
+      <h3 class="chart-header">By SLOC  <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h3>
+      <div id="fn-by-sloc" class="stat"></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <textarea id="file-source" class="col-md-12">import { DataService } from &#039;../../Services/DataService&#039;
+import { EventValidator } from &#039;../../Services/EventValidator&#039;
+import type { Event as EventDTO, InsertEventResponse, UploadFilesResponse } from &#039;../../types&#039;
+
+import { Modal } from &#039;bootstrap&#039;
+import { Ref, ref } from &#039;vue&#039;
+
+import { useMarkerStore } from &#039;../../stores/markerStore&#039;
+const markerStore = useMarkerStore()
+
+const maxLengthDesc = 20
+const maxLengthTitle = 15
+
+// refs
+const eventName = ref&lt;string&gt;(&#039;&#039;)
+const city = ref&lt;string&gt;(&#039;&#039;)
+const street = ref&lt;string&gt;(&#039;&#039;)
+const zip = ref&lt;number&gt;(0)
+const startDate = ref&lt;string&gt;(&#039;&#039;)
+const endDate = ref&lt;string&gt;(&#039;&#039;)
+const fees = ref&lt;number&gt;(0)
+const shortDesc = ref&lt;string&gt;(&#039;&#039;)
+const desc = ref&lt;string&gt;(&#039;&#039;)
+const mainFile = ref&lt;File&gt;(null)
+const selectedFiles = ref&lt;File[]&gt;([])
+const submitSuccessfull = ref&lt;boolean&gt;(true)
+
+const dataHandler = new DataService(new EventValidator())
+
+const props = defineProps&lt;{
+  localXRef: number
+  localYRef: number
+}&gt;()
+
+async function handleSubmit(): Promise&lt;void&gt; {
+  let { filesName: fileName } = await uploadFile()
+
+  let eventInfo: EventDTO = {
+    user_id: 0,
+    name: eventName.value,
+    city: city.value,
+    street: street.value,
+    zip: zip.value,
+    // remove milliseconds
+    start_date: new Date(startDate.value).toISOString().split(&#039;.&#039;)[0],
+    end_date: new Date(endDate.value).toISOString().split(&#039;.&#039;)[0],
+    fees: fees.value,
+    description_short: shortDesc.value,
+    description: desc.value,
+    image_name: fileName[0],
+    locationX: props.localXRef,
+    locationY: props.localYRef,
+  }
+
+  let { success: successEvent, eventId: eventId } = await dataHandler.addEvent(eventInfo)
+
+  submitSuccessfull.value = successEvent
+
+  await uploadFiles(eventId)
+
+  if (submitSuccessfull.value) {
+    markerStore.addMarkerToMap(eventInfo)
+    const button = document.getElementById(&#039;eventCreateClose&#039;) as HTMLButtonElement
+    button.click()
+  }
+
+  clearForm()
+}
+
+function clearForm(): void {
+  eventName.value = &#039;&#039;
+  city.value = &#039;&#039;
+  street.value = &#039;&#039;
+  zip.value = 0
+  startDate.value = &#039;&#039;
+  endDate.value = &#039;&#039;
+  fees.value = 0
+  shortDesc.value = &#039;&#039;
+  desc.value = &#039;&#039;
+  mainFile.value = null
+  selectedFiles.value = []
+}
+
+function handleFileChange(event: Event) {
+  const target = event.target as HTMLInputElement
+  console.log(target.files)
+  if (target.files) {
+    mainFile.value = target.files[0]
+  }
+}
+
+function handleFilesChange(event: Event) {
+  const target = event.target as HTMLInputElement
+  if (target.files) {
+    selectedFiles.value = Array.from(target.files)
+  }
+}
+
+async function uploadFiles(entryId: number): Promise&lt;UploadFilesResponse&gt; {
+  return await dataHandler.uploadFiles(selectedFiles.value, entryId)
+}
+
+async function uploadFile(): Promise&lt;UploadFilesResponse&gt; {
+  return await dataHandler.uploadFiles([mainFile.value])
+}</textarea>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <p>.</p>
+  </div>
+</footer>
+
+<script type="text/html" id="complexity-popover-template">
+  <div class="complexity-notice">
+    Complexity : {{ complexity.cyclomatic }} <br>
+    Length : {{ complexity.halstead.length }} <br>
+    Difficulty : {{ complexity.halstead.difficulty.toFixed(2) }} <br>
+    Est # bugs : {{ complexity.halstead.bugs.toFixed(2) }}<br>
+  </div>
+</script>
+
+<script type="text/javascript" src="../../assets/scripts/bundles/core-bundle.js"></script>
+<script type="text/javascript" src="../../assets/scripts/bundles/codemirror.js"></script>
+<script type="text/javascript" src="../../assets/scripts/codemirror.markpopovertext.js"></script>
+<script type="text/javascript" src="report.js"></script>
+<script type="text/javascript" src="report.history.js"></script>
+<script type="text/javascript" src="../../assets/scripts/plato-file.js"></script>
+</body>
+</html>

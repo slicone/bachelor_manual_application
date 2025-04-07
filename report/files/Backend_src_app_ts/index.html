@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Plato - Backend/src/app.ts</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link href="../../assets/css/vendor/morris.css" rel="stylesheet" type="text/css">
+  <link href="../../assets/css/vendor/bootstrap.css" rel="stylesheet" type="text/css">
+  <link href="../../assets/css/vendor/font-awesome.css" rel="stylesheet" type="text/css">
+  <link href="../../assets/css/vendor/codemirror.css" rel="stylesheet" type="text/css">
+  <link href="../../assets/css/plato.css" rel="stylesheet" type="text/css">
+  <link href="../../assets/css/plato-file.css" rel="stylesheet" type="text/css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="https://github.com/the-simian/es6-plato">ES6 Plato on Github</a>
+    <ul class="nav navbar-nav">
+      <li>
+        <a href="../../index.html">Report Home</a>
+      </li>
+      <li class="active">
+        <a href="display.html">Summary Display</a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="jumbotron">
+  <div class="container">
+    <h1>Backend/src/app.ts</h1>
+  </div>
+</div>
+
+<div class="container aggregate-stats">
+  <div class="row">
+    <div class="col-md-6">
+      <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"  data-container="body"></i></a></h2>
+      <p class="stat">62.98</p>
+    </div>
+    <div class="col-md-6">
+      <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h2>
+      <p class="stat">154</p>
+    </div>
+  </div>
+  <div class="row historical">
+    <div class="col-md-6">
+      <p id="chart_historical_maint" class="chart"></p>
+    </div>
+    <div class="col-md-6">
+      <p id="chart_historical_sloc" class="chart"></p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty" data-container="body"></i></a></h2>
+      <p class="stat">37.85</p>
+    </div>
+    <div class="col-md-6">
+      <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs" data-container="body"></i></a></h2>
+      <p class="stat">1.35</p>
+    </div>
+  </div>
+</div>
+
+<div class="container charts">
+  <div class="row">
+    <h2 class="header">Function weight</h2>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h3 class="chart-header">By Complexity <a href="http://en.wikipedia.org/wiki/Cyclomatic_complexity"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="This metric counts the number of distinct paths through a block of code. Lower values are better." data-original-title="Cyclomatic Complexity" data-container="body"></i></a></h3>
+      <div id="fn-by-complexity" class="stat"></div>
+    </div>
+    <div class="col-md-6">
+      <h3 class="chart-header">By SLOC  <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h3>
+      <div id="fn-by-sloc" class="stat"></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <textarea id="file-source" class="col-md-12">const bodyParser = require(&#039;body-parser&#039;);
+const path = require(&#039;path&#039;);
+const multer = require(&#039;multer&#039;);
+const express = require(&#039;express&#039;)
+const cors = require(&quot;cors&quot;);
+const app = express()
+const port = 3000
+
+import { Event } from &quot;./types/DTOs&quot;
+import sqlite3 from &quot;sqlite3&quot;;
+
+// Database Instance
+const db = require(&#039;../Services/DBConnectorService&#039;)();
+
+app.use(cors());
+app.use(bodyParser.json());
+
+
+// Image
+const imagePath = path.join(__dirname, &#039;../Database/Images&#039;);
+
+app.use(&#039;/images&#039;, express.static(imagePath));
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) =&gt; {
+    cb(null, imagePath);
+  },
+  filename: (req, file, cb) =&gt; {
+    const fileExtension = path.extname(file.originalname);
+    const uniqueName = Date.now() + &#039;-&#039; + Math.round(Math.random() * 1E9); 
+    cb(null, uniqueName + fileExtension); 
+  }
+});
+
+
+app.get(&#039;/image/upload&#039;, (req, res) =&gt; {
+  let eventId = req.query.eventId;
+
+  if (eventId === null &amp;&amp; eventId === undefined){
+    return res.status(400).json({ message: &quot;mandatory eventId missing&quot; });
+  }
+
+  db.all(&#039;SELECT i.file_path FROM Image i WHERE i.event_id = ? &#039;, [eventId], (err, row: Event) =&gt; {
+    if (err) {
+      res.status(500).json({ error: &#039;Internal Server Error&#039; });
+    } else {
+      res.json({fileNames: row})
+    }
+  });
+})
+
+const upload = multer({ storage });
+
+app.post(&quot;/image/upload&quot;, upload.array(&quot;images&quot;), (req, res) =&gt; {
+  if (!req.files) {
+    return res.status(400).json({ message: &quot;No files uploaded&quot; });
+  }
+
+  const fileNames = req.files.map((file: any) =&gt; file.filename);
+
+  console.log(req.body);
+  console.log(req.body.eventId);
+  console.log(fileNames);
+
+  let eventId = req.body.eventId;
+
+  if (eventId !== null &amp;&amp; eventId !== undefined) {
+    insertImagesIntoDB(fileNames, eventId);
+  }
+  
+  res.json({
+    message: &quot;Files uploaded successfully&quot;,
+    files: fileNames,
+  });
+});
+
+function insertImagesIntoDB(fileNames: string[], eventId: number) {
+  const query = `INSERT INTO Image (event_id, file_path) VALUES (?, ?)`;
+  // TODO Fehlerbehandlung
+  fileNames.forEach((fileName) =&gt; {
+    db.run(query, [eventId, fileName], (err: Error) =&gt; {
+      if (err) {
+        console.log(err);
+      }
+    });
+  });
+}
+
+
+app.get(&#039;/events&#039;, (req, res) =&gt; {
+  db.all(&#039;SELECT * FROM Event&#039;, [], (err, rows: Event) =&gt; {
+    if (err) {
+      res.status(500).json({ error: &#039;Internal Server Error&#039; });
+    } else {
+      res.send(rows)
+    }
+  });
+})
+
+
+// Event
+app.post(&quot;/event&quot;, async (req, res) =&gt; {
+  const event: Event = req.body;
+  const query = `INSERT INTO Event (
+    user_id, name, description, description_short, locationX, locationY, city, street, zip, fees, start_date, end_date, image_name
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+  try {
+    const values = [
+      event.user_id,
+      event.name,
+      event.description,
+      event.description_short,
+      event.locationX,
+      event.locationY,
+      event.city,
+      event.street,
+      event.zip,
+      event.fees,
+      new Date(event.start_date).toISOString(),
+      new Date(event.end_date).toISOString(), 
+      event.image_name,
+    ]
+
+    let eventId = new Promise&lt;number&gt;((resolve, reject) =&gt; {
+      db.run(query, values, function (this: sqlite3.RunResult, err) {
+        if(err) {
+          reject(err);
+        }
+        resolve(this.lastID);
+      });
+    });
+
+    eventId.then((id: number) =&gt; {
+      res.json({
+        message: &quot;Event added successfully&quot;, 
+        eventId: id
+      });
+    }).catch((error) =&gt; {
+      throw new Error(error);
+    });
+    
+  } catch (error) {
+    let message = error instanceof RangeError ? error.message : error;
+    console.log(error);
+    res.status(400).json({
+      message: message, 
+    });
+  }
+});
+
+
+app.listen(port, () =&gt; {
+  console.log(`listening on port ${port}`)
+})</textarea>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <p>.</p>
+  </div>
+</footer>
+
+<script type="text/html" id="complexity-popover-template">
+  <div class="complexity-notice">
+    Complexity : {{ complexity.cyclomatic }} <br>
+    Length : {{ complexity.halstead.length }} <br>
+    Difficulty : {{ complexity.halstead.difficulty.toFixed(2) }} <br>
+    Est # bugs : {{ complexity.halstead.bugs.toFixed(2) }}<br>
+  </div>
+</script>
+
+<script type="text/javascript" src="../../assets/scripts/bundles/core-bundle.js"></script>
+<script type="text/javascript" src="../../assets/scripts/bundles/codemirror.js"></script>
+<script type="text/javascript" src="../../assets/scripts/codemirror.markpopovertext.js"></script>
+<script type="text/javascript" src="report.js"></script>
+<script type="text/javascript" src="report.history.js"></script>
+<script type="text/javascript" src="../../assets/scripts/plato-file.js"></script>
+</body>
+</html>
